@@ -2,60 +2,50 @@ package test1;
 
 public class Solution4 {
     private volatile int i = 0;
-    private Object lock = new Object();
+    private volatile Object lock = new Object();
     private volatile int count = 100;
 
     public void p() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (count > 0) {
-                    synchronized (lock) {
-                        while (i != 0) {
-                            try {
-                                lock.wait();
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
+        new Thread(() -> {
+            while (count > 0) {
+                synchronized (lock) {
+                    while (i != 0) {
+                        try {
+                            lock.wait();
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
-
-                        count--;
-                        i = 1;
-                        System.out.println("p ...... " + System.currentTimeMillis());
-                        lock.notify();
                     }
-                }
 
-                System.out.println(count);
+                    count--;
+                    i = 1;
+                    System.out.println("p ...... " + System.currentTimeMillis());
+                    lock.notify();
+                }
             }
+            System.out.println(count);
         }).start();
     }
 
     public void c() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while (count >= 0) {
-                    synchronized (lock) {
-                        while (i == 0) {
-                            try {
-                                lock.wait();
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
+        new Thread(() -> {
+            while (count >= 0) {
+                synchronized (lock) {
+                    while (i == 0) {
+                        try {
+                            lock.wait();
+                        } catch (Exception e) {
+                            e.printStackTrace();
                         }
-                        count--;
-                        i = 0;
-                        System.out.println("c ...... " + System.currentTimeMillis());
-                        lock.notify();
                     }
+                    count--;
+                    i = 0;
+                    System.out.println("c ...... " + System.currentTimeMillis());
+                    lock.notify();
                 }
-
-                System.out.println(count);
             }
+            System.out.println(count);
         }).start();
-
-
     }
 
     public static void main(String[] args) {
